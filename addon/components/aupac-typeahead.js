@@ -26,6 +26,7 @@ export default Component.extend({
   action: Ember.K, //@public
   selection : null, //@public
   source : Ember.K, //@public
+  valueChanged: Ember.K, //@public
 
   //typeahead.js Customizations
   highlight: true, //@public
@@ -181,7 +182,7 @@ export default Component.extend({
       if (this.get('allowFreeInput')) {
         const value = this.get('_typeahead').typeahead('val');
         this.set('selection', value);
-        this.sendAction('action', value);
+        this.sendAction('valueChanged', value);
       } else if (model) {
         this.setValue(model);
       } else {

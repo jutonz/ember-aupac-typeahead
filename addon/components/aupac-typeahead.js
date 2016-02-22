@@ -8,25 +8,27 @@ import suggestionTemplate from '../templates/components/aupac-typeahead/suggesti
 const {observer, isNone, run, debug, Component} = Ember;
 
 const Key = {
-  BACKSPACE : 8,
-  DELETE : 46,
-  ENTER : 13
+  BACKSPACE: 8,
+  DELETE: 46,
+  ENTER: 13
 };
 
 export default Component.extend({
   //input tag attributes
-  tagName : 'input',
+  tagName: 'input',
   classNames: ['aupac-typeahead'],
-  attributeBindings : ['disabled','placeholder', 'name'],
-  disabled : false, //@public
-  placeholder : 'Search', //@public
-  name : '', //@public
+  attributeBindings: ['disabled','placeholder', 'name'],
+  disabled: false, //@public
+  placeholder: 'Search', //@public
+  name: '', //@public
 
   //Actions
   action: Ember.K, //@public
-  selection : null, //@public
-  source : Ember.K, //@public
+  selection: null, //@public
+  source: Ember.K, //@public
   valueChanged: Ember.K, //@public
+  transformSelection: null, //@public
+  targetObject: null, //@public
 
   //typeahead.js Customizations
   highlight: true, //@public
@@ -34,9 +36,9 @@ export default Component.extend({
   minLength: 2, //@public
   typeaheadClassNames: {}, //@public
   autoFocus: false, //@public
-  limit : 15, //@public
-  async : false, //@public
-  datasetName : '', //@public
+  limit: 15, //@public
+  async: false, //@public
+  datasetName: '', //@public
   allowFreeInput: false, //@public
 
   //HtmlBars Templates
@@ -49,21 +51,12 @@ export default Component.extend({
   //Private
   _typeahead: null,
 
-
   /**
    * @public
    * @param selection - the item selected by the user
    * @returns {*}
    */
-  display : function(selection) {
-    return selection;
-  },
-
-  /**
-   * @public
-   * @param selection the item selected by the user
-   */
-  transformSelection(selection){
+  display: function(selection) {
     return selection;
   },
 
@@ -72,7 +65,10 @@ export default Component.extend({
    * @param selection the item selected by the user
    */
   setValue : function(selection) {
-    selection = this.transformSelection(selection);
+    let transformSelection = this.get('transformSelection');
+    let targetObject       = this.get('targetObject') || this;
+    selection = transformSelection.call(targetObject, selection);
+
     if(selection) {
       this.get('_typeahead').typeahead('val', selection);
     } else {
@@ -98,17 +94,17 @@ export default Component.extend({
     const self = this;
     //Setup the typeahead
     const t = this.$().typeahead({
-      highlight: this.get('highlight'),
-      hint: this.get('hint'),
-      minLength: this.get('minLength'),
+      highlight:  this.get('highlight'),
+      hint:       this.get('hint'),
+      minLength:  this.get('minLength'),
       classNames: this.get('typeaheadClassNames')
       }, {
-        component : this,
-        name: this.get('datasetName') || 'default',
-        display: this.get('display'),
-        async: this.get('async'),
-        limit: this.get('limit'),
-        source: this.get('source'),
+        component: this,
+        name:     this.get('datasetName') || 'default',
+        display:  this.get('display'),
+        async:    this.get('async'),
+        limit:    this.get('limit'),
+        source:   this.get('source'),
         templates: {
           suggestion: function (model) {
             const item = Component.create({
@@ -206,5 +202,4 @@ export default Component.extend({
     this._super(...arguments);
     this.get('_typeahead').typeahead('destroy');
   }
-
 });
